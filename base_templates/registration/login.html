@@ -1,0 +1,43 @@
+{% load static %}  <!-- habilita uso do 'static' -->
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <title>Entrar — SGPI</title>
+  <link rel="stylesheet" href="{% static 'css/login.css' %}">
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <h1>Entrar no SGPI</h1>
+
+    {% if form.non_field_errors %}
+      <p class="nonfield">{{ form.non_field_errors|join:", " }}</p>
+    {% endif %}
+
+    <form method="post" action="{% url 'login' %}">
+      {% csrf_token %}
+      <div>
+        <label for="{{ form.username.id_for_label }}">Usuário</label>
+        {{ form.username }}
+        {% if form.username.errors %}<p class="errorlist">{{ form.username.errors|join:", " }}</p>{% endif %}
+      </div>
+      <div>
+        <label for="{{ form.password.id_for_label }}">Senha</label>
+        {{ form.password }}
+        {% if form.password.errors %}<p class="errorlist">{{ form.password.errors|join:", " }}</p>{% endif %}
+      </div>
+
+      {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+
+      <button type="submit">Entrar</button>
+    </form>
+
+    <p class="footer">
+      <a href="{% url 'password_reset' %}">Esqueceu a senha?</a>
+    </p>
+  </div>
+</div>
+</body>
+</html>

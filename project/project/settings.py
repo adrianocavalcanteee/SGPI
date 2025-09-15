@@ -20,7 +20,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-k$=d+0y=ei=(m%vki@m-$4f-qa*dj+th%x)8i+bky-($3x_o#&'
+SECRET_KEY = 'django-insecure-q!z88w5aaz1bp=jy^qap2rf7in&n3l@d_=#bf^!!a5i*#!d=^3'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -37,8 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    "sgpi.apps.SgpiConfig",
-    
+    'sgpi',
 ]
 
 MIDDLEWARE = [
@@ -49,7 +48,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    
 ]
 
 ROOT_URLCONF = 'project.urls'
@@ -59,6 +57,7 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
             BASE_DIR / 'base_templates'
+
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -119,18 +118,13 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [
-	BASE_DIR / 'base_static'
-]
-	
-
+STATIC_URL = 'static/'
+STATICFILES_DIRS = (
+    BASE_DIR / 'base_static',
+)
+STATIC_ROOT = BASE_DIR / 'static'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-LOGIN_URL = "/accounts/login/"
-LOGIN_REDIRECT_URL = "/"          # pra onde ir após logar
-LOGOUT_REDIRECT_URL = "/accounts/login/"   # pra onde ir após sair
