@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Usuários · SGPI{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="actions-bar">
+    <h2 style="margin:0">Usuários</h2>
+    <a class="btn" href="{% url 'criar_usuario' %}">+ Criar usuário</a>
+  </div>
+
+  <form method="get" class="search" style="margin-bottom:10px">
+    <input type="text" name="q" placeholder="Buscar por username..." value="{{ q }}">
+    <button class="btn secondary" type="submit">Buscar</button>
+  </form>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Username</th>
+        <th>Nome</th>
+        <th>Email</th>
+        <th>Ativo</th>
+        <th>Staff</th>
+        <th style="width:220px">Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for u in usuarios %}
+        <tr>
+          <td>{{ u.username }}</td>
+          <td>{{ u.first_name }} {{ u.last_name }}</td>
+          <td>{{ u.email }}</td>
+          <td>{{ u.is_active|yesno:"Sim,Não" }}</td>
+          <td>{{ u.is_staff|yesno:"Sim,Não" }}</td>
+          <td class="actions">
+            <div class="actions">
+              <a class="btn secondary" href="{% url 'editar_usuario' u.id %}">Editar</a>
+              <a class="btn danger" href="{% url 'deletar_usuario' u.id %}">Deletar</a>
+            </div>
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="6">Nenhum usuário encontrado.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% if usuarios.paginator.num_pages > 1 %}
+    <div class="actions-bar" style="margin-top:12px">
+      <div>Página {{ usuarios.number }} de {{ usuarios.paginator.num_pages }}</div>
+      <div class="row">
+        {% if usuarios.has_previous %}
+          <a class="btn secondary" href="?page={{ usuarios.previous_page_number }}{% if q %}&q={{ q }}{% endif %}">Anterior</a>
+        {% endif %}
+        {% if usuarios.has_next %}
+          <a class="btn secondary" href="?page={{ usuarios.next_page_number }}{% if q %}&q={{ q }}{% endif %}">Próxima</a>
+        {% endif %}
+      </div>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

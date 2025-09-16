@@ -1,0 +1,30 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>{% block title %}SGPI{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap">
+      <div class="brand">SGPI</div>
+      <nav class="nav">
+        <a href="{% url 'lista_usuarios' %}">Usuários</a>
+        {% if request.user.is_authenticated %}
+          <span class="spacer"></span>
+          <span class="hi">Olá, {{ request.user.username }}</span>
+          <a class="logout" href="{% url 'logout' %}">Sair</a>
+        {% endif %}
+      </nav>
+    </div>
+  </header>
+
+  <main class="main">
+    {% include "_messages.html" %}
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

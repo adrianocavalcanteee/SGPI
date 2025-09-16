@@ -66,6 +66,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+
             ],
         },
     },
@@ -131,6 +132,6 @@ STATICFILES_DIRS = [
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-LOGIN_URL = "/accounts/login/"
-LOGIN_REDIRECT_URL = "/"          # pra onde ir após logar
-LOGOUT_REDIRECT_URL = "/accounts/login/"   # pra onde ir após sair
+LOGIN_URL = "/login/"
+LOGIN_REDIRECT_URL = "/usuarios/"
+LOGOUT_REDIRECT_URL = "/login/"

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}{{ titulo }} · SGPI{% endblock %}
+{% block content %}
+<div class="card narrow">
+  <h2 style="margin-top:0">{{ titulo }}</h2>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <div class="row" style="margin-top:10px">
+      <button type="submit" class="btn">Salvar</button>
+      <a href="{% url 'lista_usuarios' %}" class="btn secondary">Voltar</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
+

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Deletar usuário · SGPI{% endblock %}
+{% block content %}
+<div class="card narrow">
+  <h2 style="margin-top:0">Deletar usuário</h2>
+  <p>Tem certeza que deseja deletar <strong>{{ usuario.username }}</strong>?</p>
+  <form method="post" style="margin-top:14px">
+    {% csrf_token %}
+    <div class="row">
+      <button type="submit" class="btn danger">Sim, deletar</button>
+      <a href="{% url 'lista_usuarios' %}" class="btn secondary">Cancelar</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
