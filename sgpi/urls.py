@@ -12,4 +12,13 @@ urlpatterns = [
     
     path("registros/", views.RegistroProducaoListView.as_view(), name="registros-lista"),
     path("registros/<int:pk>/", views.RegistroProducaoDetailView.as_view(), name="registros-detalhes"),
+
+
+    #urls dos USERS
+    path("usuarios/", views.lista_usuarios, name="lista_usuarios"),
+    path("usuarios/criar/", views.criar_usuario, name="criar_usuario"),
+    path("usuarios/<int:user_id>/editar/", views.editar_usuario, name="editar_usuario"),
+    path("usuarios/<int:user_id>/deletar/", views.deletar_usuario, name="deletar_usuario"),
+
+
 ]

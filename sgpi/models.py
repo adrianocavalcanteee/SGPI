@@ -42,6 +42,7 @@ class RegistroProducao(models.Model):
     atualizado_em = models.DateTimeField(auto_now=True)
     finalizada = models.BooleanField(default=False)
     finalizada_em = models.DateTimeField(blank=True, null=True)
+    motivo_parada = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.linha.nome} - {self.data} - {self.turno}"
