@@ -1,20 +1,20 @@
+# sgpi/models.py
 from datetime import datetime, timedelta
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Sum
+from django.utils import timezone
 
 
 class LinhaProducao(models.Model):
     nome = models.CharField(max_length=100)
     setor = models.CharField(max_length=100, blank=True, null=True)
-
     capacidade_nominal = models.PositiveIntegerField(
         help_text="Capacidade nominal em unidades por hora"
     )
 
     def __str__(self):
         return self.nome
-
 
 
 class RegistroProducao(models.Model):
@@ -28,15 +28,13 @@ class RegistroProducao(models.Model):
         LinhaProducao, on_delete=models.CASCADE, related_name="registros"
     )
     data = models.DateField()
-    turno = models.CharField(max_length=10, choices=TURNO_CHOICES)
+    turno = models.CharField(max_length=20, choices=TURNO_CHOICES)
 
-    
     quantidade_produzida = models.PositiveIntegerField(default=0)
     quantidade_defeituosa = models.PositiveIntegerField(default=0)
     tempo_parado = models.PositiveIntegerField(
         default=0, help_text="Tempo parado em minutos"
     )
-    
 
     criado_em = models.DateTimeField(auto_now_add=True)
     atualizado_em = models.DateTimeField(auto_now=True)
@@ -53,7 +51,6 @@ class RegistroProducao(models.Model):
             return 0
         return (self.quantidade_defeituosa / self.quantidade_produzida) * 100
 
-    
     def recalc_totais(self, save=True):
         agg_horas = self.registros_hora.aggregate(
             prod=Sum("quantidade_produzida"),
@@ -77,18 +74,26 @@ class RegistroProducao(models.Model):
 
     class Meta:
         verbose_name = "Registro de produção"
-        verbose_name_plural = "Registros de producão"
-        unique_together = [("linha", "data", "turno")]  
+        verbose_name_plural = "Registros de produção"
+        constraints = [
+            models.UniqueConstraint(fields=["linha", "data", "turno"], name="uniq_linha_data_turno")
+        ]
+
     def finalizar(self, save=True):
-        
         self.recalc_totais(save=False)
         self.finalizada = True
         self.finalizada_em = timezone.now()
         if save:
-            self.save(update_fields=[
-                "quantidade_produzida", "quantidade_defeituosa",
-                "tempo_parado", "finalizada", "finalizada_em", "atualizado_em"
-            ])
+            self.save(
+                update_fields=[
+                    "quantidade_produzida",
+                    "quantidade_defeituosa",
+                    "tempo_parado",
+                    "finalizada",
+                    "finalizada_em",
+                    "atualizado_em",
+                ]
+            )
 
     def reabrir(self, save=True):
         self.finalizada = False
@@ -96,7 +101,20 @@ class RegistroProducao(models.Model):
         if save:
             self.save(update_fields=["finalizada", "finalizada_em", "atualizado_em"])
 
-   
+    def clean(self):
+        super().clean()
+        if self.data and self.data > timezone.now().date():
+            raise ValidationError({"data": "A data do registro não pode ser no futuro."})
+
+        if (
+            self.quantidade_produzida is not None
+            and self.quantidade_defeituosa is not None
+            and self.quantidade_defeituosa > self.quantidade_produzida
+        ):
+            raise ValidationError(
+                {"quantidade_defeituosa": "Quantidade defeituosa não pode ser maior que a produzida."}
+            )
+
     @property
     def resumo_total_produzido(self):
         return self.quantidade_produzida
@@ -121,7 +139,6 @@ class RegistroHora(models.Model):
     hora_inicio = models.TimeField()
     hora_fim = models.TimeField()
 
-    
     quantidade_produzida = models.PositiveIntegerField(default=0)
     quantidade_defeituosa = models.PositiveIntegerField(default=0)
 
@@ -129,8 +146,16 @@ class RegistroHora(models.Model):
         return f"{self.registro} - {self.hora_inicio} às {self.hora_fim}"
 
     def clean(self):
+        super().clean()
         if self.hora_fim == self.hora_inicio:
             raise ValidationError("A hora final deve ser diferente da hora inicial.")
+
+        if (
+            self.quantidade_produzida is not None
+            and self.quantidade_defeituosa is not None
+            and self.quantidade_defeituosa > self.quantidade_produzida
+        ):
+            raise ValidationError("Quantidade defeituosa não pode ser maior que a produzida.")
 
     @property
     def minutos_intervalo(self) -> int:
@@ -165,12 +190,11 @@ class Parada(models.Model):
         return f"Parada {self.hora_inicio} - {self.hora_fim} ({self.duracao} min)"
 
     def clean(self):
-        
+        super().clean()
         if self.hora_fim == self.hora_inicio:
             raise ValidationError("A hora final deve ser diferente da hora inicial.")
 
     def save(self, *args, **kwargs):
-        
         dt_ini = datetime.combine(self.registro.data, self.hora_inicio)
         dt_fim = datetime.combine(self.registro.data, self.hora_fim)
         if dt_fim <= dt_ini:

@@ -1,12 +1,14 @@
+
 from django.contrib import admin, messages
+from django.db import transaction
+from django.core.exceptions import PermissionDenied
 from .models import LinhaProducao, RegistroProducao, RegistroHora, Parada
-
-
 
 
 @admin.register(LinhaProducao)
 class LinhaProducaoAdmin(admin.ModelAdmin):
     list_display = ("nome", "setor", "capacidade_nominal")
+
 
 class RegistroHoraInline(admin.TabularInline):
     model = RegistroHora
@@ -57,7 +59,6 @@ class RegistroProducaoAdmin(admin.ModelAdmin):
     date_hierarchy = "data"
     inlines = [RegistroHoraInline, ParadaInline]
 
-
     @admin.display(description="Total produzido (u)")
     def resumo_total_produzido(self, obj: RegistroProducao):
         return obj.resumo_total_produzido
@@ -74,19 +75,16 @@ class RegistroProducaoAdmin(admin.ModelAdmin):
     def resumo_tempo_parado_min(self, obj: RegistroProducao):
         return obj.resumo_tempo_parado_min
 
-    
     base_readonly = ("quantidade_produzida", "quantidade_defeituosa", "tempo_parado")
 
     def get_readonly_fields(self, request, obj=None):
         if obj and obj.finalizada:
-            
             return self.base_readonly + (
                 "linha", "data", "turno", "motivo_parada", "finalizada", "finalizada_em",
-                
                 "resumo_total_produzido", "resumo_total_defeituoso",
                 "resumo_taxa_defeitos_pct", "resumo_tempo_parado_min",
             )
-        
+
         return self.base_readonly + (
             "resumo_total_produzido", "resumo_total_defeituoso",
             "resumo_taxa_defeitos_pct", "resumo_tempo_parado_min",
@@ -103,7 +101,6 @@ class RegistroProducaoAdmin(admin.ModelAdmin):
             "fields": (
                 ("linha", "data", "turno"),
                 ("quantidade_produzida", "quantidade_defeituosa", "tempo_parado"),
-                
                 ("finalizada", "finalizada_em"),
             )
         }),
@@ -114,21 +111,52 @@ class RegistroProducaoAdmin(admin.ModelAdmin):
     @admin.action(description="Finalizar registros selecionados")
     def acao_finalizar(self, request, queryset):
         count = 0
-        for reg in queryset:
-            if not reg.finalizada:
-                reg.finalizar()
-                count += 1
+        with transaction.atomic():
+            for reg in queryset:
+                if not reg.finalizada:
+                    reg.finalizar()
+                    count += 1
         self.message_user(request, f"{count} registro(s) finalizado(s).", level=messages.SUCCESS)
 
     @admin.action(description="Reabrir registros selecionados")
     def acao_reabrir(self, request, queryset):
         count = 0
-        for reg in queryset:
-            if reg.finalizada:
-                reg.reabrir()
-                count += 1
+        with transaction.atomic():
+            for reg in queryset:
+                if reg.finalizada:
+                    reg.reabrir()
+                    count += 1
         self.message_user(request, f"{count} registro(s) reaberto(s).", level=messages.WARNING)
 
     def save_related(self, request, form, formsets, change):
+      
         super().save_related(request, form, formsets, change)
         form.instance.recalc_totais()
+
+
+    def has_delete_permission(self, request, obj=None):
+      
+       
+        if obj and obj.finalizada:
+            return False
+        return super().has_delete_permission(request, obj)
+
+    def get_actions(self, request):
+        
+        actions = super().get_actions(request) or {}
+        if "delete_selected" in actions:
+            del actions["delete_selected"]
+        return actions
+
+    def save_model(self, request, obj, form, change):
+        
+        if change:
+            try:
+                orig = RegistroProducao.objects.get(pk=obj.pk)
+            except RegistroProducao.DoesNotExist:
+                orig = None
+            if orig and orig.finalizada:
+                
+                self.message_user(request, "Registro finalizado — reabra o registro antes de editar.", level=messages.ERROR)
+                return
+        super().save_model(request, obj, form, change)
