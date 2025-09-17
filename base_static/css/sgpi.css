@@ -86,3 +86,14 @@ button:hover, input[type="submit"]:hover, a.button:hover {
 .td-acoes form {
     margin: 0;
 }
+
+.table td form {
+    display: inline-block;
+    margin: 0;
+}
+
+.table td form button {
+    padding: 4px 10px; 
+    font-size: 0.875rem; 
+    vertical-align: middle; 
+}

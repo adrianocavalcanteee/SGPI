@@ -13,9 +13,63 @@
         <p><strong>Turno:</strong> {{ registro.turno }}</p>
         <p><strong>Produzido:</strong> {{ registro.quantidade_produzida }}</p>
         <p><strong>Defeituoso:</strong> {{ registro.quantidade_defeituosa }}</p>
-        <p><strong>Tempo parado:</strong> {{ registro.tempo_parado }}</p>
+        <p><strong>Tempo parado:</strong> {{ registro.tempo_parado }} min</p>
         <p><strong>Motivo:</strong> {{ registro.motivo_parada }}</p>
         <p><strong>Status:</strong> {{ registro.finalizada|yesno:"Finalizado,Pendente" }}</p>
+
+        <h2>Produção hora a hora</h2>
+        {% if producao_hora %}
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Hora Início</th>
+                    <th>Hora Fim</th>
+                    <th>Produzido</th>
+                    <th>Defeituoso</th>
+                    <th>Taxa (%)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for hora in producao_hora %}
+                <tr>
+                    <td>{{ hora.hora_inicio }}</td>
+                    <td>{{ hora.hora_fim }}</td>
+                    <td>{{ hora.quantidade_produzida }}</td>
+                    <td>{{ hora.quantidade_defeituosa }}</td>
+                    <td>{{ hora.taxa_defeitos|floatformat:2 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>Nenhum registro hora a hora encontrado.</p>
+        {% endif %}
+
+        <h2>Paradas</h2>
+        {% if paradas %}
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Hora Início</th>
+                    <th>Hora Fim</th>
+                    <th>Duração (min)</th>
+                    <th>Motivo</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for parada in paradas %}
+                <tr>
+                    <td>{{ parada.hora_inicio }}</td>
+                    <td>{{ parada.hora_fim }}</td>
+                    <td>{{ parada.duracao }}</td>
+                    <td>{{ parada.motivo }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>Nenhuma parada registrada.</p>
+        {% endif %}
 
         <a href="{% url 'registros-editar' registro.pk %}" class="button">Editar</a>
         <a href="{% url 'registros-lista' %}" class="button">Voltar</a>

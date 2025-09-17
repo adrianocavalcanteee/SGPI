@@ -15,8 +15,8 @@ urlpatterns = [
     # URLs para registros
     path("registros/", views.RegistroProducaoListView.as_view(), name="registros-lista"),
     path("registros/<int:pk>/", views.RegistroProducaoDetailView.as_view(), name="registros-detalhes"),
-    path("registros/criar/", views.RegistroProducaoCreateView.as_view(), name="registros-criar"),
-    path("registros/<int:pk>/editar/", views.RegistroProducaoUpdateView.as_view(), name="registros-editar"),
+    path('registros/novo/', views.criar_registro, name='registros-criar'),
+    path('registros/<int:pk>/editar/', views.editar_registro, name='registros-editar'),
     # finalizar/reabrir
     path("registros/<int:pk>/finalizar/", views.registro_finalizar, name="registros-finalizar"),
     path("registros/<int:pk>/reabrir/", views.registro_reabrir, name="registros-reabrir"),

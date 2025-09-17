@@ -7,6 +7,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
+from .forms import RegistroProducaoForm, RegistroHoraFormSet
 
 from .forms import CustomUserCreationForm, CustomUserChangeForm
 
@@ -36,11 +37,11 @@ class LinhaProducaoDeleteView(DeleteView):
     template_name = "linhas/confirm_delete.html"
     success_url = reverse_lazy("linhas-lista")
 
-
 class RegistroProducaoListView(ListView):
     model = RegistroProducao
     template_name = "registros/lista.html"
     context_object_name = "registros"
+    ordering = ["-data", "turno"]
 
 
 class RegistroProducaoDetailView(DetailView):
@@ -48,40 +49,94 @@ class RegistroProducaoDetailView(DetailView):
     template_name = "registros/detalhes.html"
     context_object_name = "registro"
 
-class RegistroProducaoCreateView(CreateView):
-    model = RegistroProducao
-    template_name = "registros/form.html"
-    fields = [
-        "linha", "data", "turno",
-        "quantidade_produzida", "quantidade_defeituosa",
-        "tempo_parado", "motivo_parada"
-    ]
-    success_url = reverse_lazy("registros-lista")
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        registro = self.object
+        # Produção hora a hora
+        context['producao_hora'] = registro.registros_hora.all()
+        # Paradas do registro
+        context['paradas'] = registro.paradas.all()
+        return context
 
 
-class RegistroProducaoUpdateView(UpdateView):
-    model = RegistroProducao
-    template_name = "registros/form.html"
-    fields = [
-        "linha", "data", "turno",
-        "quantidade_produzida", "quantidade_defeituosa",
-        "tempo_parado", "motivo_parada"
-    ]
-    success_url = reverse_lazy("registros-lista")
+@login_required
+def criar_registro(request):
+    if request.method == "POST":
+        form = RegistroProducaoForm(request.POST)
+        formset = RegistroHoraFormSet(request.POST)
+        if form.is_valid() and formset.is_valid():
+            
+            registro = form.save(commit=False)
+            registro.save()
+
+            
+            formset.instance = registro
+            formset.save()
+
+          
+            total_produzido = sum(h.quantidade_produzida for h in registro.registros_hora.all())
+            registro.quantidade_produzida = total_produzido
+            registro.save(update_fields=['quantidade_produzida'])
+
+            messages.success(request, "Registro criado com sucesso.")
+            return redirect("registros-lista")
+    else:
+        form = RegistroProducaoForm()
+        formset = RegistroHoraFormSet()
+
+    return render(request, "registros/form.html", {
+        "form": form,
+        "formset": formset,
+        "titulo": "Novo Registro de Produção"
+    })
+
+@login_required
+def editar_registro(request, pk):
+    registro = get_object_or_404(RegistroProducao, pk=pk)
+
+    if request.method == "POST":
+        form = RegistroProducaoForm(request.POST, instance=registro)
+        formset = RegistroHoraFormSet(request.POST, instance=registro)
+
+        if form.is_valid() and formset.is_valid():
+          
+            form.save()
+           
+            formset.save()
+
+            
+            total_produzido = sum(h.quantidade_produzida for h in registro.registros_hora.all())
+            registro.quantidade_produzida = total_produzido
+            registro.save(update_fields=['quantidade_produzida'])
+
+            messages.success(request, "Registro atualizado com sucesso.")
+            return redirect("registros-lista")
+
+    else:
+        form = RegistroProducaoForm(instance=registro)
+        formset = RegistroHoraFormSet(instance=registro)
+
+    return render(request, "registros/form.html", {
+        "form": form,
+        "formset": formset,
+        "titulo": f"Editar Registro {registro.pk}"
+    })
+
 
 @login_required
 def registro_finalizar(request, pk):
     registro = get_object_or_404(RegistroProducao, pk=pk)
     if not registro.finalizada:
-        registro.finalizar()  # supondo que você tenha esse método no model
+        registro.finalizar()
         messages.success(request, "Registro finalizado com sucesso.")
     return redirect("registros-lista")
+
 
 @login_required
 def registro_reabrir(request, pk):
     registro = get_object_or_404(RegistroProducao, pk=pk)
     if registro.finalizada:
-        registro.reabrir()  # supondo que você tenha esse método no model
+        registro.reabrir()
         messages.success(request, "Registro reaberto com sucesso.")
     return redirect("registros-lista")
 
