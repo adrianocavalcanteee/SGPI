@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Linhas de Produção{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h1>Linhas de Produção</h1>
+        <a href="{% url 'linhas-criar' %}" class="button">Nova Linha</a>
+    </div>
+    <div class="card-body">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Setor</th>
+                    <th>Capacidade</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for linha in linhas %}
+                <tr>
+                    <td>{{ linha.nome }}</td>
+                    <td>{{ linha.setor }}</td>
+                    <td>{{ linha.capacidade_nominal }}</td>
+                    <td>
+                        <a href="{% url 'linhas-editar' linha.pk %}" class="button">Editar</a>
+                        <a href="{% url 'linhas-deletar' linha.pk %}" class="button">Deletar</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="4">Nenhuma linha encontrada.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

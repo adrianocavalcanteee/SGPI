@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}{{ linha.nome|default:"Nova Linha" }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h1>{{ linha.nome|default:"Nova Linha" }}</h1>
+    </div>
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="button">Salvar</button>
+            <a href="{% url 'linhas-lista' %}" class="button">Cancelar</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

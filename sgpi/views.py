@@ -17,12 +17,6 @@ class LinhaProducaoListView(ListView):
     context_object_name = "linhas"
 
 
-class LinhaProducaoDetailView(DetailView):
-    model = LinhaProducao
-    template_name = "linhas/detalhes.html"
-    context_object_name = "linha"
-
-
 class LinhaProducaoCreateView(CreateView):
     model = LinhaProducao
     template_name = "linhas/form.html"
@@ -54,6 +48,42 @@ class RegistroProducaoDetailView(DetailView):
     template_name = "registros/detalhes.html"
     context_object_name = "registro"
 
+class RegistroProducaoCreateView(CreateView):
+    model = RegistroProducao
+    template_name = "registros/form.html"
+    fields = [
+        "linha", "data", "turno",
+        "quantidade_produzida", "quantidade_defeituosa",
+        "tempo_parado", "motivo_parada"
+    ]
+    success_url = reverse_lazy("registros-lista")
+
+
+class RegistroProducaoUpdateView(UpdateView):
+    model = RegistroProducao
+    template_name = "registros/form.html"
+    fields = [
+        "linha", "data", "turno",
+        "quantidade_produzida", "quantidade_defeituosa",
+        "tempo_parado", "motivo_parada"
+    ]
+    success_url = reverse_lazy("registros-lista")
+
+@login_required
+def registro_finalizar(request, pk):
+    registro = get_object_or_404(RegistroProducao, pk=pk)
+    if not registro.finalizada:
+        registro.finalizar()  # supondo que você tenha esse método no model
+        messages.success(request, "Registro finalizado com sucesso.")
+    return redirect("registros-lista")
+
+@login_required
+def registro_reabrir(request, pk):
+    registro = get_object_or_404(RegistroProducao, pk=pk)
+    if registro.finalizada:
+        registro.reabrir()  # supondo que você tenha esse método no model
+        messages.success(request, "Registro reaberto com sucesso.")
+    return redirect("registros-lista")
 
 #views do CRUD de users
 def _so_superuser(u):

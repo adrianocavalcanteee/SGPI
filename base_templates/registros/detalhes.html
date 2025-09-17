@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Detalhes do Registro{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h1>Registro {{ registro.pk }}</h1>
+    </div>
+    <div class="card-body">
+        <p><strong>Linha:</strong> {{ registro.linha.nome }}</p>
+        <p><strong>Data:</strong> {{ registro.data }}</p>
+        <p><strong>Turno:</strong> {{ registro.turno }}</p>
+        <p><strong>Produzido:</strong> {{ registro.quantidade_produzida }}</p>
+        <p><strong>Defeituoso:</strong> {{ registro.quantidade_defeituosa }}</p>
+        <p><strong>Tempo parado:</strong> {{ registro.tempo_parado }}</p>
+        <p><strong>Motivo:</strong> {{ registro.motivo_parada }}</p>
+        <p><strong>Status:</strong> {{ registro.finalizada|yesno:"Finalizado,Pendente" }}</p>
+
+        <a href="{% url 'registros-editar' registro.pk %}" class="button">Editar</a>
+        <a href="{% url 'registros-lista' %}" class="button">Voltar</a>
+    </div>
+</div>
+{% endblock %}

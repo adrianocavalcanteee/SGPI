@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Registros de Produção{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h1>Registros de Produção</h1>
+        <a href="{% url 'registros-criar' %}" class="button">Novo Registro</a>
+    </div>
+    <div class="card-body">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Linha</th>
+                    <th>Data</th>
+                    <th>Turno</th>
+                    <th>Produzido</th>
+                    <th>Defeituoso</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for registro in registros %}
+                <tr class="{% if registro.finalizada %}finalizado{% endif %}">
+                    <td>{{ registro.linha.nome }}</td>
+                    <td>{{ registro.data }}</td>
+                    <td>{{ registro.turno }}</td>
+                    <td>{{ registro.quantidade_produzida }}</td>
+                    <td>{{ registro.quantidade_defeituosa }}</td>
+                    <td>{{ registro.finalizada|yesno:"Finalizado,Pendente" }}</td>
+                    <td class="td-acoes">
+                        <a href="{% url 'registros-detalhes' registro.pk %}" class="button">Detalhes</a>
+                        {% if not registro.finalizada %}
+                        <a href="{% url 'registros-editar' registro.pk %}" class="button">Editar</a>
+                        <form method="post" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" formaction="{% url 'registros-finalizar' registro.pk %}">Finalizar</button>
+                        </form>
+                        {% else %}
+                        <form method="post" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" formaction="{% url 'registros-reabrir' registro.pk %}">Reabrir</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7">Nenhum registro encontrado.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
