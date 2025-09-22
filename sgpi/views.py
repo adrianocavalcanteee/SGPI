@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
-from .forms import RegistroProducaoForm, RegistroHoraFormSet
+from .forms import RegistroProducaoForm, RegistroHoraFormSet, ParadaFormSet
 
 from .forms import CustomUserCreationForm, CustomUserChangeForm
 
@@ -37,11 +37,24 @@ class LinhaProducaoDeleteView(DeleteView):
     template_name = "linhas/confirm_delete.html"
     success_url = reverse_lazy("linhas-lista")
 
+
 class RegistroProducaoListView(ListView):
     model = RegistroProducao
     template_name = "registros/lista.html"
     context_object_name = "registros"
     ordering = ["-data", "turno"]
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        registros = context['registros']
+
+        
+        for registro in registros:
+            hora = registro.registros_hora.all()
+            registro.total_produzido = sum(h.quantidade_produzida for h in hora)
+            registro.total_defeituoso = sum(h.quantidade_defeituosa for h in hora)
+
+        return context
 
 
 class RegistroProducaoDetailView(DetailView):
@@ -52,43 +65,54 @@ class RegistroProducaoDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         registro = self.object
-        # Produção hora a hora
-        context['producao_hora'] = registro.registros_hora.all()
-        # Paradas do registro
-        context['paradas'] = registro.paradas.all()
-        return context
 
+        producao_hora = registro.registros_hora.all()
+        paradas = registro.paradas.all()
+
+        context['producao_hora'] = producao_hora
+        context['paradas'] = paradas
+        context['total_produzido'] = sum(h.quantidade_produzida for h in producao_hora)
+        context['total_defeituoso'] = sum(h.quantidade_defeituosa for h in producao_hora)
+
+        return context
+    
 
 @login_required
 def criar_registro(request):
     if request.method == "POST":
         form = RegistroProducaoForm(request.POST)
-        formset = RegistroHoraFormSet(request.POST)
-        if form.is_valid() and formset.is_valid():
-            
-            registro = form.save(commit=False)
-            registro.save()
+        formset_hora = RegistroHoraFormSet(request.POST, prefix="hora")
+        formset_parada = ParadaFormSet(request.POST, prefix="parada")
 
-            
-            formset.instance = registro
-            formset.save()
+        if form.is_valid() and formset_hora.is_valid() and formset_parada.is_valid():
+            registro = form.save()
 
-          
-            total_produzido = sum(h.quantidade_produzida for h in registro.registros_hora.all())
-            registro.quantidade_produzida = total_produzido
-            registro.save(update_fields=['quantidade_produzida'])
+           
+            formset_hora.instance = registro
+            formset_hora.save()
+
+            formset_parada.instance = registro
+            formset_parada.save()
+
+         
+            registro.quantidade_produzida = sum(h.quantidade_produzida for h in registro.registros_hora.all())
+            registro.quantidade_defeituosa = sum(h.quantidade_defeituosa for h in registro.registros_hora.all())
+            registro.save(update_fields=['quantidade_produzida', 'quantidade_defeituosa'])
 
             messages.success(request, "Registro criado com sucesso.")
-            return redirect("registros-lista")
+            return redirect("registros-detalhes", pk=registro.pk)
     else:
         form = RegistroProducaoForm()
-        formset = RegistroHoraFormSet()
+        formset_hora = RegistroHoraFormSet(prefix="hora")
+        formset_parada = ParadaFormSet(prefix="parada")
 
     return render(request, "registros/form.html", {
         "form": form,
-        "formset": formset,
+        "formset_hora": formset_hora,
+        "formset_parada": formset_parada,
         "titulo": "Novo Registro de Produção"
     })
+
 
 @login_required
 def editar_registro(request, pk):
@@ -96,32 +120,33 @@ def editar_registro(request, pk):
 
     if request.method == "POST":
         form = RegistroProducaoForm(request.POST, instance=registro)
-        formset = RegistroHoraFormSet(request.POST, instance=registro)
+        formset_hora = RegistroHoraFormSet(request.POST, instance=registro, prefix="hora")
+        formset_parada = ParadaFormSet(request.POST, instance=registro, prefix="parada")
 
-        if form.is_valid() and formset.is_valid():
-          
-            form.save()
-           
-            formset.save()
+        if form.is_valid() and formset_hora.is_valid() and formset_parada.is_valid():
+            registro = form.save()
+            formset_hora.instance = registro
+            formset_hora.save()
+            formset_parada.instance = registro
+            formset_parada.save()
 
-            
-            total_produzido = sum(h.quantidade_produzida for h in registro.registros_hora.all())
-            registro.quantidade_produzida = total_produzido
-            registro.save(update_fields=['quantidade_produzida'])
+            registro.quantidade_produzida = sum(h.quantidade_produzida for h in registro.registros_hora.all())
+            registro.quantidade_defeituosa = sum(h.quantidade_defeituosa for h in registro.registros_hora.all())
+            registro.save(update_fields=['quantidade_produzida', 'quantidade_defeituosa'])
 
             messages.success(request, "Registro atualizado com sucesso.")
-            return redirect("registros-lista")
-
+            return redirect("registros-detalhes", pk=registro.pk)
     else:
         form = RegistroProducaoForm(instance=registro)
-        formset = RegistroHoraFormSet(instance=registro)
+        formset_hora = RegistroHoraFormSet(instance=registro, prefix="hora")
+        formset_parada = ParadaFormSet(instance=registro, prefix="parada")
 
     return render(request, "registros/form.html", {
         "form": form,
-        "formset": formset,
+        "formset_hora": formset_hora,
+        "formset_parada": formset_parada,
         "titulo": f"Editar Registro {registro.pk}"
     })
-
 
 @login_required
 def registro_finalizar(request, pk):

@@ -10,34 +10,69 @@
     <div class="card-body">
         <form method="post">
             {% csrf_token %}
-            {{ form.as_p }}
+            {{ form.non_field_errors }}
+            <div>
+                {{ form.as_p }}
+            </div>
 
             <h3>Produção hora a hora</h3>
-            {{ formset.management_form }}
-            {% for f in formset %}
-                <div class="form-row">
-                    <div class="form-group col">
-                        {{ f.hora_inicio.label_tag }} {{ f.hora_inicio }}
-                    </div>
-                    <div class="form-group col">
-                        {{ f.hora_fim.label_tag }} {{ f.hora_fim }}
-                    </div>
-                    <div class="form-group col">
-                        {{ f.quantidade_produzida.label_tag }} {{ f.quantidade_produzida }}
-                    </div>
-                    <div class="form-group col">
-                        {{ f.quantidade_defeituosa.label_tag }} {{ f.quantidade_defeituosa }}
-                    </div>
-                    {% if f.instance.pk %}
-                        <div class="form-group col">
-                            {{ f.DELETE }} <label>Excluir</label>
-                        </div>
-                    {% endif %}
-                </div>
-            {% endfor %}
+            {{ formset_hora.management_form }}
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Hora Início</th>
+                        <th>Hora Fim</th>
+                        <th>Produzido</th>
+                        <th>Defeituoso</th>
+                        <th>Remover</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for form_hora in formset_hora %}
+                    <tr>
+                        <td>{{ form_hora.hora_inicio }}</td>
+                        <td>{{ form_hora.hora_fim }}</td>
+                        <td>{{ form_hora.quantidade_produzida }}</td>
+                        <td>{{ form_hora.quantidade_defeituosa }}</td>
+                        <td>
+                            {% if form_hora.instance.pk %}
+                                {{ form_hora.DELETE }}
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
 
-            <button type="submit" class="button">Salvar</button>
-            <a href="{% url 'registros-lista' %}" class="button btn-secondary">Cancelar</a>
+            <h3>Paradas</h3>
+            {{ formset_parada.management_form }}
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Hora Início</th>
+                        <th>Hora Fim</th>
+                        <th>Motivo</th>
+                        <th>Remover</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for form_parada in formset_parada %}
+                    <tr>
+                        <td>{{ form_parada.hora_inicio }}</td>
+                        <td>{{ form_parada.hora_fim }}</td>
+                        <td>{{ form_parada.motivo }}</td>
+                        <td>
+                            {% if form_parada.instance.pk %}
+                                {{ form_parada.DELETE }}
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <button type="submit" class="btn">Salvar</button>
+            <a href="{% url 'registros-lista' %}" class="btn secondary">Cancelar</a>
         </form>
     </div>
 </div>
