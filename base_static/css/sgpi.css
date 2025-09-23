@@ -97,3 +97,51 @@ button:hover, input[type="submit"]:hover, a.button:hover {
     font-size: 0.875rem; 
     vertical-align: middle; 
 }
+
+.btn.lg {
+    padding: 0.9rem 1.25rem;
+    font-size: 0.95rem;
+    border-radius: 14px;
+  }
+  
+.btn.wide {
+    min-width: 140px;
+  }
+  
+ 
+.table .actions {
+    display: flex;
+    gap: .6rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  
+  
+.table .actions .btn {
+    width: auto;
+  }
+  
+  
+tr.finalizado {
+    background-color: #d4edda !important;
+  }
+ 
+.btn.sm {
+    padding: 0.55rem 0.9rem;
+    font-size: 0.9rem;
+    border-radius: 12px;
+  }
+  
+
+.table .actions .btn {
+    min-width: 110px;   
+  }
+  
+ 
+.table .actions {
+    display: flex;
+    gap: .5rem;
+    align-items: center;
+    flex-wrap: nowrap;
+  }
+  

@@ -3,64 +3,68 @@
 {% block title %}Registros de Produção{% endblock %}
 
 {% block content %}
-
 <div class="card">
-<div class="actions-bar">
-<h2>Registros de Produção</h2>
-<a href="{% url 'registros-criar' %}" class="btn">Novo Registro</a>
-</div>
+  <div class="actions-bar">
+    <h2>Registros de Produção</h2>
+    <a href="{% url 'registros-criar' %}" class="btn">Novo Registro</a>
+  </div>
 
-<form method="get" class="search" style="margin-bottom:10px">
+  <form method="get" class="search" style="margin-bottom:10px">
     <input type="text" name="q" placeholder="Buscar registro..." value="{{ q }}">
     <button class="btn secondary" type="submit">Buscar</button>
-</form>
+  </form>
 
-<div>
+  <div>
     <table class="table">
-        <thead>
-            <tr>
-                <th>Linha</th>
-                <th>Data</th>
-                <th>Turno</th>
-                <th>Produzido</th>
-                <th>Defeituoso</th>
-                <th>Status</th>
-                <th style="width:280px">Ações</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for registro in registros %}
-            <tr class="{% if registro.finalizada %}finalizado{% endif %}">
-                <td>{{ registro.linha.nome }}</td>
-                <td>{{ registro.data }}</td>
-                <td>{{ registro.turno }}</td>
-                <td>{{ registro.total_produzido }}</td>
-                <td>{{ registro.total_defeituoso }}</td>
-                <td>{{ registro.finalizada|yesno:"Finalizado,Pendente" }}</td>
-                <td class="actions">
-                    <a href="{% url 'registros-detalhes' registro.pk %}" class="btn edit">Detalhes</a>
-                    {% if not registro.finalizada %}
-                    <a href="{% url 'registros-editar' registro.pk %}" class="btn secondary">Editar</a>
-                    <form method="post" style="display:inline-flex;">
-                        {% csrf_token %}
-                        <button type="submit" class="btn danger" formaction="{% url 'registros-finalizar' registro.pk %}">Finalizar</button>
-                    </form>
-                    {% else %}
-                    <form method="post" style="display:inline-flex;">
-                        {% csrf_token %}
-                        <button type="submit" class="btn edit" formaction="{% url 'registros-reabrir' registro.pk %}">Reabrir</button>
-                    </form>
-                    {% endif %}
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="7">Nenhum registro encontrado.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
+      <thead>
+        <tr>
+          <th>Linha</th>
+          <th>Data</th>
+          <th>Turno</th>
+          <th>Status</th>
+          <th style="width:320px">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for registro in registros %}
+        <tr class="{% if registro.finalizada %}finalizado{% endif %}">
+          <td>{{ registro.linha.nome }}</td>
+          <td>{{ registro.data }}</td>
+          <td>{{ registro.turno }}</td>
+         
+          <td>{{ registro.finalizada|yesno:"Finalizado,Pendente" }}</td>
+          <td class="actions">
+            <a href="{% url 'registros-detalhes' registro.pk %}" class="btn edit sm">Detalhes</a>
+          
+            {% if not registro.finalizada %}
+              <a href="{% url 'registros-editar' registro.pk %}" class="btn secondary sm">Editar</a>
+              <form method="post" style="display:inline-flex;">
+                {% csrf_token %}
+                <button type="submit" class="btn danger sm"
+                        formaction="{% url 'registros-finalizar' registro.pk %}">
+                  Finalizar
+                </button>
+              </form>
+            {% else %}
+              <form method="post" style="display:inline-flex;">
+                {% csrf_token %}
+                <button type="submit" class="btn edit sm"
+                        formaction="{% url 'registros-reabrir' registro.pk %}">
+                  Reabrir
+                </button>
+              </form>
+            {% endif %}
+          </td>
+          
+        </tr>
+        {% empty %}
+        <tr>
+          
+          <td colspan="5">Nenhum registro encontrado.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
     </table>
-</div>
-
+  </div>
 </div>
 {% endblock %}

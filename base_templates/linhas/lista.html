@@ -4,36 +4,42 @@
 
 {% block content %}
 <div class="card">
-    <div class="card-header">
-        <h1>Linhas de Produção</h1>
-        <a href="{% url 'linhas-criar' %}" class="button">Nova Linha</a>
+    <div class="actions-bar">
+        <h2>Linhas de Produção</h2>
+        <a href="{% url 'linhas-criar' %}" class="btn">Nova Linha</a>
     </div>
-    <div class="card-body">
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Nome</th>
-                    <th>Setor</th>
-                    <th>Capacidade</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for linha in linhas %}
-                <tr>
-                    <td>{{ linha.nome }}</td>
-                    <td>{{ linha.setor }}</td>
-                    <td>{{ linha.capacidade_nominal }}</td>
-                    <td>
-                        <a href="{% url 'linhas-editar' linha.pk %}" class="button">Editar</a>
-                        <a href="{% url 'linhas-deletar' linha.pk %}" class="button">Deletar</a>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr><td colspan="4">Nenhuma linha encontrada.</td></tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Setor</th>
+                <th>Capacidade</th>
+                <th style="width: 220px;">Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for linha in linhas %}
+            <tr>
+                <td>{{ linha.nome }}</td>
+                <td>{{ linha.setor }}</td>
+                <td>{{ linha.capacidade_nominal }}</td>
+                <td class="actions">
+                    <a href="{% url 'linhas-editar' linha.pk %}" class="btn secondary sm">Editar</a>
+                    <form method="post" style="display:inline-flex;">
+                        {% csrf_token %}
+                        <button type="submit"
+                                class="btn danger sm"
+                                formaction="{% url 'linhas-deletar' linha.pk %}">
+                            Deletar
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4">Nenhuma linha encontrada.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
 {% endblock %}

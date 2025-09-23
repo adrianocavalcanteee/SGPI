@@ -18,8 +18,7 @@ class RegistroProducaoForm(forms.ModelForm):
         model = RegistroProducao
         fields = [
             "linha", "data", "turno",
-             "quantidade_defeituosa",
-            "tempo_parado", "motivo_parada", "finalizada"
+            "finalizada"
         ]
         widgets = {
             "data": forms.DateInput(attrs={"type": "date"}),
@@ -38,7 +37,7 @@ class RegistroProducaoForm(forms.ModelForm):
         data = cleaned.get("data")
         if data and data > timezone.now().date():
             raise ValidationError("A data do registro não pode ser no futuro.")
-        # garantir consistência básica entre totais (opcional)
+        
         qtd = cleaned.get("quantidade_produzida")
         defe = cleaned.get("quantidade_defeituosa")
         if qtd is not None and defe is not None and defe > qtd:
