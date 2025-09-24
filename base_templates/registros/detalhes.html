@@ -11,10 +11,18 @@
         <p><strong>Linha:</strong> {{ registro.linha.nome }}</p>
         <p><strong>Data:</strong> {{ registro.data }}</p>
         <p><strong>Turno:</strong> {{ registro.turno }}</p>
-        <p><strong>Produzido:</strong> {{ registro.quantidade_produzida }}</p>
-        <p><strong>Defeituoso:</strong> {{ registro.quantidade_defeituosa }}</p>
-        <p><strong>Tempo parado:</strong> {{ registro.tempo_parado }} min</p>
-        <p><strong>Motivo:</strong> {{ registro.motivo_parada }}</p>
+
+        <p><strong>Produzido:</strong> {{ total_produzido }}</p>
+        <p><strong>Defeituoso:</strong> {{ total_defeituoso }}</p>
+        <p><strong>Tempo parado:</strong> {{ tempo_parado_total }} min</p>
+        <p><strong>Motivo(s):</strong>
+            {% if motivos_paradas and motivos_paradas|length > 0 %}
+                {{ motivos_paradas|join:", " }}
+            {% else %}
+                —
+            {% endif %}
+        </p>
+
         <p><strong>Status:</strong> {{ registro.finalizada|yesno:"Finalizado,Pendente" }}</p>
 
         <h2>Produção hora a hora</h2>

@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+
 {% block title %}{{ titulo }}{% endblock %}
 
 {% block content %}
@@ -6,7 +7,6 @@
   <div class="card-header">
     <h1>{{ titulo }}</h1>
   </div>
-
   <div class="card-body">
     <form method="post">
       {% csrf_token %}
@@ -16,9 +16,11 @@
         {{ form.as_p }}
       </div>
 
-      <!-- ===================== PRODUÇÃO HORA A HORA ===================== -->
       <h3>Produção hora a hora</h3>
       {{ formset_hora.management_form }}
+      {% if formset_hora.non_form_errors %}
+        <div class="alert alert-error">{{ formset_hora.non_form_errors }}</div>
+      {% endif %}
       <table class="table table-striped">
         <thead>
           <tr>
@@ -26,78 +28,63 @@
             <th>Hora Fim</th>
             <th>Produzido</th>
             <th>Defeituoso</th>
-            <th>Ações</th>
+            <th>Ação</th>
           </tr>
         </thead>
         <tbody>
-            {% for form_hora in formset_hora %}
-              {% if not form_hora.DELETE.value %}
-              <tr>
-                <td>{{ form_hora.hora_inicio }}</td>
-                <td>{{ form_hora.hora_fim }}</td>
-                <td>{{ form_hora.quantidade_produzida }}</td>
-                <td>{{ form_hora.quantidade_defeituosa }}</td>
-                <td>
-                 
-                  <span style="display:none;">{{ form_hora.DELETE }}</span>
-          
-                  <button type="submit"
-                          name="rem_hora"
-                          value="{{ form_hora.prefix }}"
-                          class="btn danger xs"
-                          title="Remover esta hora">
-                    &minus;
-                  </button>
-                </td>
-              </tr>
-              {% endif %}
-            {% endfor %}
-          </tbody>
-      </table>
+          {% for form_hora in formset_hora %}
+          <tr>
+            <!-- ID oculto para manter vínculo com registros existentes -->
+            <td style="display:none">{{ form_hora.id }}</td>
 
+            <td>{{ form_hora.hora_inicio }}</td>
+            <td>{{ form_hora.hora_fim }}</td>
+            <td>{{ form_hora.quantidade_produzida }}</td>
+            <td>{{ form_hora.quantidade_defeituosa }}</td>
+            <td>
+              <span style="display:none;">{{ form_hora.DELETE }}</span>
+              <button type="submit" name="rem_hora" value="{{ form_hora.prefix }}" class="btn danger xs">&minus;</button>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
       <button type="submit" name="add_hora" class="btn secondary sm">+ Adicionar hora</button>
 
-      <!-- ===================== PARADAS ===================== -->
-      <h3 style="margin-top: 18px;">Paradas</h3>
+      <h3>Paradas</h3>
       {{ formset_parada.management_form }}
+      {% if formset_parada.non_form_errors %}
+        <div class="alert alert-error">{{ formset_parada.non_form_errors }}</div>
+      {% endif %}
       <table class="table table-striped">
         <thead>
           <tr>
             <th>Hora Início</th>
             <th>Hora Fim</th>
             <th>Motivo</th>
-            <th>Ações</th>
+            <th>Ação</th>
           </tr>
         </thead>
         <tbody>
-            {% for form_parada in formset_parada %}
-              {% if not form_parada.DELETE.value %}
-              <tr>
-                <td>{{ form_parada.hora_inicio }}</td>
-                <td>{{ form_parada.hora_fim }}</td>
-                <td>{{ form_parada.motivo }}</td>
-                <td>
-                  <span style="display:none;">{{ form_parada.DELETE }}</span>
-          
-                  <button type="submit"
-                          name="rem_parada"
-                          value="{{ form_parada.prefix }}"
-                          class="btn danger xs"
-                          title="Remover esta parada">
-                    &minus;
-                  </button>
-                </td>
-              </tr>
-              {% endif %}
-            {% endfor %}
-          </tbody>
-          
-      </table>
+          {% for form_parada in formset_parada %}
+          <tr>
+            <!-- ID oculto -->
+            <td style="display:none">{{ form_parada.id }}</td>
 
+            <td>{{ form_parada.hora_inicio }}</td>
+            <td>{{ form_parada.hora_fim }}</td>
+            <td>{{ form_parada.motivo }}</td>
+            <td>
+              <span style="display:none;">{{ form_parada.DELETE }}</span>
+              <button type="submit" name="rem_parada" value="{{ form_parada.prefix }}" class="btn danger xs">&minus;</button>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
       <button type="submit" name="add_parada" class="btn secondary sm">+ Adicionar parada</button>
 
-      <!-- ===================== AÇÕES PRINCIPAIS ===================== -->
-      <div style="margin-top:16px; display:flex; gap:8px;">
+      <div style="margin-top:20px;">
         <button type="submit" name="salvar" class="btn">Salvar</button>
         <a href="{% url 'registros-lista' %}" class="btn secondary">Cancelar</a>
       </div>
