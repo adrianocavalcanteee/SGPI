@@ -137,11 +137,16 @@ tr.finalizado {
     min-width: 110px;   
   }
   
- 
+  
 .table .actions {
     display: flex;
     gap: .5rem;
     align-items: center;
     flex-wrap: nowrap;
   }
-  
+.btn.xs {
+    padding: 0.35rem 0.6rem;
+    font-size: 0.8rem;
+    min-width: 0;
+    line-height: 1;
+  }

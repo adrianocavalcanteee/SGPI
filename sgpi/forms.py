@@ -24,14 +24,7 @@ class RegistroProducaoForm(forms.ModelForm):
             "data": forms.DateInput(attrs={"type": "date"}),
             "finalizada": forms.HiddenInput(),
         }
-    RegistroHoraFormSet = inlineformset_factory(
-    RegistroProducao,
-    RegistroHora,
-    fields=["hora_inicio", "hora_fim", "quantidade_produzida", "quantidade_defeituosa"],
-    extra=1,
-    can_delete=True
-)
-
+        
     def clean(self):
         cleaned = super().clean()
         data = cleaned.get("data")

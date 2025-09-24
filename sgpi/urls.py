@@ -1,6 +1,6 @@
 # sgpi/urls.py
 from django.urls import path
-from sgpi import views
+from . import views
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
