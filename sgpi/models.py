@@ -1,5 +1,5 @@
-# sgpi/models.py
 from datetime import datetime, timedelta
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Sum
@@ -100,6 +100,7 @@ class RegistroProducao(models.Model):
         self.finalizada_em = None
         if save:
             self.save(update_fields=["finalizada", "finalizada_em", "atualizado_em"])
+
 
     def clean(self):
         super().clean()
@@ -206,3 +207,27 @@ class Parada(models.Model):
         ordering = ("hora_inicio",)
         verbose_name = "Parada"
         verbose_name_plural = "Paradas"
+
+class PermissaoSetorUsuario(models.Model):
+   
+    usuario = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="permissoes_setor",
+    )
+    setor = models.CharField(max_length=100)
+
+    class Meta:
+        unique_together = ("usuario", "setor")
+        verbose_name = "Permissão de setor por usuário"
+        verbose_name_plural = "Permissões de setor por usuário"
+
+    def __str__(self):
+        return f"{self.usuario} -> setor {self.setor}"
+
+    def clean(self):
+        super().clean()
+        # opcional: garantir que exista ao menos uma linha cadastrada nesse setor
+        from .models import LinhaProducao
+        if not LinhaProducao.objects.filter(setor=self.setor).exists():
+            raise ValidationError({"setor": "Não existe nenhuma linha cadastrada com este setor."})

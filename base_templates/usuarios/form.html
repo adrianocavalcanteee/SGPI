@@ -1,16 +1,58 @@
 {% extends "base.html" %}
-{% block title %}{{ titulo }} · SGPI{% endblock %}
+{% block title %}{{ titulo }}{% endblock %}
+
 {% block content %}
-<div class="card narrow">
-  <h2 style="margin-top:0">{{ titulo }}</h2>
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <div class="row" style="margin-top:10px">
-      <button type="submit" class="btn">Salvar</button>
-      <a href="{% url 'lista_usuarios' %}" class="btn secondary">Voltar</a>
-    </div>
-  </form>
+<div class="card">
+  <div class="card-header"><h1>{{ titulo }}</h1></div>
+
+  <div class="card-body">
+    <form method="post">
+      {% csrf_token %}
+    
+      {{ form.non_field_errors }}
+      {% for field in form %}
+        <div style="margin-bottom:8px">
+          <label>{{ field.label }}</label>
+          {{ field }}
+          {% for e in field.errors %}
+            <div class="alert alert-error">{{ e }}</div>
+          {% endfor %}
+        </div>
+      {% endfor %}
+    
+      <h3>Permissões por setor</h3>
+      {{ perm_formset.management_form }}
+      {{ perm_formset.non_form_errors }}
+      <table class="table table-striped">
+        <thead>
+          <tr><th>Setor</th><th style="width:100px">Ação</th></tr>
+        </thead>
+        <tbody>
+          {% for f in perm_formset %}
+          <tr>
+            <td style="display:none">{{ f.id }}</td>
+            <td>
+              {{ f.setor }}
+              {% for e in f.setor.errors %}<div class="alert alert-error">{{ e }}</div>{% endfor %}
+            </td>
+            <td>
+              <span style="display:none">{{ f.DELETE }}</span>
+              <button type="submit" name="rem_perm" value="{{ f.prefix }}" class="btn danger">&minus;</button>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="2" style="color:#6b7280">Nenhum setor adicionado.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    
+      <button type="submit" name="add_perm" class="btn secondary">+ Adicionar setor</button>
+    
+      <div style="margin-top:12px; display:flex; gap:8px">
+        <button type="submit" name="salvar" class="btn">Salvar</button>
+        <a href="{% url 'lista_usuarios' %}" class="btn secondary">Cancelar</a>
+      </div>
+    </form>
+  </div>
 </div>
 {% endblock %}
-
