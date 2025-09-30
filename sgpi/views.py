@@ -500,3 +500,7 @@ def registro_reabrir(request, pk):
         registro.reabrir()
         messages.success(request, "Registro reaberto com sucesso.")
     return redirect("registros-lista")
+
+#Redefinir senha
+def forgot_password(request):
+    return render(request, "registration/forgot_password.html")

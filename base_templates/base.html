@@ -13,18 +13,27 @@
     <div class="wrap">
       <div class="brand">SGPI</div>
       <nav class="nav">
-        {% if request.user.is_authenticated and request.user.is_superuser %}
-          <a href="{% url 'lista_usuarios' %}">Usuários</a>
-          <a href="{% url 'linhas-lista' %}">Linhas</a>
-        {% endif %}
-        <a href="{% url 'registros-lista' %}">Registros</a>
-
-        {% if request.user.is_authenticated %}
+        {% if user.is_authenticated %}
+          <a href="{% url 'registros-lista' %}">Registros</a>
+      
+          {% if user.is_staff %}
+            <a href="{% url 'linhas-lista' %}">Linhas</a>
+          {% endif %}
+      
+          {% if user.is_superuser %}
+            <a href="{% url 'lista_usuarios' %}">Usuários</a>
+          {% endif %}
+      
           <span class="spacer"></span>
-          <span class="hi">Olá, {{ request.user.username }}</span>
-          <a class="logout" href="{% url 'logout' %}">Sair</a>
+          <span class="hi">Olá, {{ user.username }}</span>
+          <form action="{% url 'logout' %}" method="post" style="display:inline;">
+            {% csrf_token %}<button type="submit" class="logout">Sair</button>
+          </form>
+        {% else %}
+          <a href="{% url 'login' %}">Login</a>
         {% endif %}
       </nav>
+      
     </div>
   </header>
 

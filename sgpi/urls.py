@@ -35,4 +35,7 @@ urlpatterns = [
     path("usuarios/criar/", views.criar_usuario, name="criar_usuario"),
     path("usuarios/<int:user_id>/editar/", views.editar_usuario, name="editar_usuario"),
     path("usuarios/<int:user_id>/deletar/", views.deletar_usuario, name="deletar_usuario"),
+
+    #redefinir senha 
+    path("forgot-password/", views.forgot_password, name="forgot_password"),
 ]
